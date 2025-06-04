@@ -90,4 +90,40 @@ router.delete('/unfollow', async (req, res) => {
     }
 });
 
+router.get('/follows/status', async (req, res) => {
+    const { follower_firebase_uid, followed_firebase_uid } = req.query;
+
+    if (!follower_firebase_uid || !followed_firebase_uid) {
+        return res.status(400).json({ message: 'Missing required query parameters: follower_firebase_uid, followed_firebase_uid' });
+    }
+
+    let connection;
+    try {
+        connection = await db.getConnection();
+
+        const [followerRows] = await connection.execute('SELECT id FROM users WHERE firebase_uid = ?', [follower_firebase_uid]);
+        const [followedRows] = await connection.execute('SELECT id FROM users WHERE firebase_uid = ?', [followed_firebase_uid]);
+
+        if (followerRows.length === 0 || followedRows.length === 0) {
+            return res.status(200).json({ isFollowing: false, message: 'One or both users not found.' });
+        }
+
+        const followerId = followerRows[0].id;
+        const followedId = followedRows[0].id;
+
+        const [existingFollow] = await connection.execute(
+            'SELECT COUNT(*) AS count FROM follows WHERE follower_id = ? AND followed_id = ?',
+            [followerId, followedId]
+        );
+
+        res.status(200).json({ isFollowing: existingFollow[0].count > 0 });
+
+    } catch (error) {
+        console.error('Error checking follow status:', error);
+        res.status(500).json({ message: 'Internal server error.', error: error.message });
+    } finally {
+        if (connection) connection.release();
+    }
+});
+
 module.exports = router;
