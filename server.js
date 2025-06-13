@@ -1,8 +1,6 @@
 require('dotenv').config(); 
 const express = require('express');
 const cors = require('cors');
-const db = require('./config/db'); 
-const { supabase, supabaseStorageBucket } = newFunction(); 
 const userRoutes = require('./routes/userRoutes');
 const storyRoutes = require('./routes/storyRoutes');
 const followRoutes = require('./routes/followRoutes');
@@ -22,7 +20,3 @@ app.listen(port, '0.0.0.0', () => {
     console.log(`Server is running on http://localhost:${port}`);
     console.log(`API base URL: http://localhost:${port}/api`);
 });
-
-function newFunction() {
-    return require('./config/supabase');
-}
