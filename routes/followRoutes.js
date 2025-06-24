@@ -126,4 +126,74 @@ router.get('/follows/status', async (req, res) => {
     }
 });
 
+router.get('/users/:firebase_uid/followers', async (req, res) => {
+    const { firebase_uid } = req.params;
+    const loggedInUserUid = req.query.loggedInUserUid; 
+
+    try {
+        const [userRows] = await db.execute('SELECT id FROM users WHERE firebase_uid = ?', [firebase_uid]);
+        if (userRows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        const userId = userRows[0].id;
+
+        const sql = `
+            SELECT
+                u.firebase_uid,
+                u.username,
+                u.full_name,
+                u.profile_image_url,
+                (SELECT COUNT(*) FROM follows WHERE follower_id = (SELECT id FROM users WHERE firebase_uid = ?) AND followed_id = f.follower_id) > 0 AS is_following
+            FROM
+                follows f
+            JOIN
+                users u ON f.follower_id = u.id
+            WHERE
+                f.followed_id = ?
+        `;
+
+        const [followers] = await db.execute(sql, [loggedInUserUid, userId]);
+        res.status(200).json(followers);
+
+    } catch (error) {
+        console.error('Error fetching followers:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
+router.get('/users/:firebase_uid/following', async (req, res) => {
+    const { firebase_uid } = req.params;
+    const loggedInUserUid = req.query.loggedInUserUid;
+
+    try {
+        const [userRows] = await db.execute('SELECT id FROM users WHERE firebase_uid = ?', [firebase_uid]);
+        if (userRows.length === 0) {
+            return res.status(404).json({ message: 'User not found.' });
+        }
+        const userId = userRows[0].id;
+        
+        const sql = `
+            SELECT
+                u.firebase_uid,
+                u.username,
+                u.full_name,
+                u.profile_image_url,
+                (SELECT COUNT(*) FROM follows WHERE follower_id = (SELECT id FROM users WHERE firebase_uid = ?) AND followed_id = f.followed_id) > 0 AS is_following
+            FROM
+                follows f
+            JOIN
+                users u ON f.followed_id = u.id
+            WHERE
+                f.follower_id = ?
+        `;
+
+        const [following] = await db.execute(sql, [loggedInUserUid, userId]);
+        res.status(200).json(following);
+
+    } catch (error) {
+        console.error('Error fetching following list:', error);
+        res.status(500).json({ message: 'Internal server error.' });
+    }
+});
+
 module.exports = router;

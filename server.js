@@ -4,6 +4,7 @@ const cors = require('cors');
 const userRoutes = require('./routes/userRoutes');
 const storyRoutes = require('./routes/storyRoutes');
 const followRoutes = require('./routes/followRoutes');
+const profileRoutes = require('./routes/profileRoutes');
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -14,7 +15,8 @@ app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 app.use('/api', userRoutes);    
 app.use('/api', storyRoutes);   
-app.use('/api', followRoutes);  
+app.use('/api', followRoutes);
+app.use('/api', profileRoutes);  
 
 app.listen(port, '0.0.0.0', () => {
     console.log(`Server is running on http://localhost:${port}`);

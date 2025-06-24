@@ -10,8 +10,6 @@ router.get('/stories', async (req, res) => {
                 s.description,
                 s.media_url AS photo_url,
                 s.location,
-                s.likes_count,
-                s.comments_count,
                 s.created_at,
                 s.updated_at,
                 u.username AS author_username,
@@ -34,8 +32,6 @@ router.get('/stories', async (req, res) => {
             location: story.location,
             author_username: story.author_username,
             author_avatar_url: story.author_avatar_url || 'assets/images/user-profile.png',
-            likes_count: story.likes_count,
-            comments_count: story.comments_count,
             author_firebase_uid: story.author_firebase_uid,
         }));
 
