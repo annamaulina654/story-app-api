@@ -1,11 +1,19 @@
 require('dotenv').config();
 const mysql = require('mysql2/promise');
 
+const connectionUrl = process.env.DATABASE_URL;
+
+if (!connectionUrl) {
+    throw new Error("DATABASE_URL environment variable is not set.");
+}
+
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    uri: connectionUrl,
+    
+    ssl: {
+        rejectUnauthorized: false 
+    },
+    
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
@@ -13,11 +21,11 @@ const pool = mysql.createPool({
 
 pool.getConnection()
     .then(connection => {
-        console.log('Connected to MySQL database!');
+        console.log('Successfully connected to Aiven MySQL database!');
         connection.release();
     })
     .catch(err => {
-        console.error('Error connecting to MySQL:', err);
+        console.error('FATAL ERROR: Could not connect to Aiven MySQL.', err);
         process.exit(1);
     });
 
