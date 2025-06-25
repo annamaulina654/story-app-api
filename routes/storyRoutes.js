@@ -63,7 +63,7 @@ router.post('/stories', async (req, res) => {
 
         const [result] = await connection.execute(
             'INSERT INTO stories (user_id, description, media_url, location, created_at) VALUES (?, ?, ?, ?, ?)',
-            [userId, description, public_image_url, location, new Date(), 0, 0] 
+            [userId, description, public_image_url, location, new Date()] 
         );
 
         await connection.commit();
