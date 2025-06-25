@@ -62,7 +62,7 @@ router.post('/stories', async (req, res) => {
         const userId = userRows[0].id;
 
         const [result] = await connection.execute(
-            'INSERT INTO stories (user_id, description, media_url, location, created_at, likes_count, comments_count) VALUES (?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO stories (user_id, description, media_url, location, created_at) VALUES (?, ?, ?, ?, ?)',
             [userId, description, public_image_url, location, new Date(), 0, 0] 
         );
 
